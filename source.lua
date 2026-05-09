@@ -3840,9 +3840,9 @@ do -- Configs
     -- save selected config inside Configs folder
     local SelectedFile = Library.Folders.AutoLoad .. "/selected.txt"
 
-	local ConfigsList = ConfigsSection:Dropdown({
+	local AutoLoadList = ConfigsSection:Dropdown({
         Name = "AutoLoad",
-        Flag = "ConfigsList",
+        Flag = "AutoloadList",
         Items = {},
         Multi = false,
         Callback = function(Value)
