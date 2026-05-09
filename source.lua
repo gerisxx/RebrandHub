@@ -3828,111 +3828,81 @@ end
     Library.CreateSettingsPage = function(self, Window)
         local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do 
             local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
-local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
-local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
+            local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
+            local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
 
-do -- Configs
-    local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
+            do -- Configs
+                local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
 
-    local ConfigName = ""
-    local ConfigSelected
+                local ConfigName = ""
+                local ConfigSelected
 
-    -- save selected config inside Configs folder
-    local SelectedFile = Library.Folders.Configs .. "/selected.txt"
+                local ConfigsList = ConfigsSection:Dropdown({
+                    Name = "Configs", 
+                    Flag = "ConfigsList", 
+                    Items = { }, 
+                    Multi = false,
+                    Callback = function(Value)
+                        ConfigSelected = Value
+                    end
+                })
 
-    local ConfigsList = ConfigsSection:Dropdown({
-        Name = "Configs",
-        Flag = "ConfigsList",
-        Items = {},
-        Multi = false,
-        Callback = function(Value)
-            ConfigSelected = Value
+                ConfigsSection:Textbox({ 
+                    Default = "", 
+                    Flag = "ConfigName", 
+                    Placeholder = "Config name", 
+                    Callback = function(Value)
+                        ConfigName = Value
+                    end
+                })
 
-            -- save selected config
-            writefile(SelectedFile, Value)
-        end
-    })
+                ConfigsSection:Button({
+                    Name = "Create",
+                    Callback = function()
+                    if ConfigName and ConfigName ~= "" then
+                        if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
+                            writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
+                            Library:RefreshConfigsList(ConfigsList)
+                        else
+                            return
+                        end
+                    end
+                end})
 
-    ConfigsSection:Textbox({
-        Default = "",
-        Flag = "ConfigName",
-        Placeholder = "Config name",
-        Callback = function(Value)
-            ConfigName = Value
-        end
-    })
+                ConfigsSection:Button({
+                    Name = "Delete", 
+                    Callback = function()
+                    if ConfigSelected then
+                        Library:DeleteConfig(ConfigSelected)
+                        Library:RefreshConfigsList(ConfigsList)
+                    end
+                end})
 
-    ConfigsSection:Button({
-        Name = "Create",
-        Callback = function()
-            if ConfigName and ConfigName ~= "" then
-                local Path = Library.Folders.Configs .. "/" .. ConfigName .. ".json"
+                ConfigsSection:Button({
+                    Name = "Load", 
+                    Callback = function()
+                    if ConfigSelected then
+                        Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. ConfigSelected))
+                    end
+                end})
 
-                if not isfile(Path) then
-                    writefile(Path, Library:GetConfig())
+                ConfigsSection:Button({
+                    Name = "Save", 
+                    Callback = function()
+                    if ConfigName and ConfigName ~= "" then
+                        writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
+                        Library:RefreshConfigsList(ConfigsList)
+                    end
+                end})
+
+                ConfigsSection:Button({
+                    Name = "Refresh", 
+                    Callback = function()
                     Library:RefreshConfigsList(ConfigsList)
-                end
+                end})
+
+                Library:RefreshConfigsList(ConfigsList)               
             end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Delete",
-        Callback = function()
-            if ConfigSelected then
-                Library:DeleteConfig(ConfigSelected)
-                Library:RefreshConfigsList(ConfigsList)
-            end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Load",
-        Callback = function()
-            if ConfigSelected then
-                local Path = Library.Folders.Configs .. "/" .. ConfigSelected
-
-                if isfile(Path) then
-                    Library:LoadConfig(readfile(Path))
-                end
-            end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Save",
-        Callback = function()
-            if ConfigSelected then
-                writefile(
-                    Library.Folders.Configs .. "/" .. ConfigSelected,
-                    Library:GetConfig()
-                )
-
-                Library:RefreshConfigsList(ConfigsList)
-            end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Refresh",
-        Callback = function()
-            Library:RefreshConfigsList(ConfigsList)
-        end
-    })
-
-    -- auto load selected config
-    if isfile(SelectedFile) then
-        local SavedConfig = readfile(SelectedFile)
-        local Path = Library.Folders.Configs .. "/" .. SavedConfig
-
-        if isfile(Path) then
-            ConfigSelected = SavedConfig
-            Library:LoadConfig(readfile(Path))
-        end
-    end
-
-    Library:RefreshConfigsList(ConfigsList)
-end
 
             do -- Theming
                 local ThemingSection = ThemingSubPage:Section({Name = "Theming", Icon = "131595494666590", Side = 1})
