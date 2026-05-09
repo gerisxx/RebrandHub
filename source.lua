@@ -3837,12 +3837,8 @@ do -- Configs
     local ConfigName = ""
     local ConfigSelected
 
-    local AutoLoadFolder = Library.Folders.Configs .. "/AutoLoad"
-    local SelectedFile = AutoLoadFolder .. "/selected.txt"
-
-    if not isfolder(AutoLoadFolder) then
-        makefolder(AutoLoadFolder)
-    end
+    -- save selected config inside Configs folder
+    local SelectedFile = Library.Folders.Configs .. "/selected.txt"
 
     local ConfigsList = ConfigsSection:Dropdown({
         Name = "Configs",
