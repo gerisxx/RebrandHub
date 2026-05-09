@@ -3826,8 +3826,8 @@ end
     end
 
     Library.CreateSettingsPage = function(self, Window)
-local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do
-    local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
+        local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do 
+            local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
 local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
 local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
 
@@ -3837,13 +3837,8 @@ do -- Configs
     local ConfigName = ""
     local ConfigSelected
 
-    -- folders
-    local AutoLoadFolder = Library.Folders.Main .. "/AutoLoad"
-    local SelectedFile = AutoLoadFolder .. "/selected.txt"
-
-    if not isfolder(AutoLoadFolder) then
-        makefolder(AutoLoadFolder)
-    end
+    -- save selected config inside Configs folder
+    local SelectedFile = Library.Folders.Configs .. "/selected.txt"
 
     local ConfigsList = ConfigsSection:Dropdown({
         Name = "Configs",
@@ -3852,6 +3847,9 @@ do -- Configs
         Multi = false,
         Callback = function(Value)
             ConfigSelected = Value
+
+            -- save selected config
+            writefile(SelectedFile, Value)
         end
     })
 
@@ -3911,24 +3909,6 @@ do -- Configs
                 )
 
                 Library:RefreshConfigsList(ConfigsList)
-            end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Set AutoLoad",
-        Callback = function()
-            if ConfigSelected then
-                writefile(SelectedFile, ConfigSelected)
-            end
-        end
-    })
-
-    ConfigsSection:Button({
-        Name = "Clear AutoLoad",
-        Callback = function()
-            if isfile(SelectedFile) then
-                delfile(SelectedFile)
             end
         end
     })
