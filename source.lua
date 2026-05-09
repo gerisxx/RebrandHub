@@ -3826,10 +3826,10 @@ end
     end
 
     Library.CreateSettingsPage = function(self, Window)
-        local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do 
+       	 local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do 
             local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
-local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
-local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
+			local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
+			local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
 
 do -- Configs
     local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
@@ -3838,7 +3838,17 @@ do -- Configs
     local ConfigSelected
 
     -- save selected config inside Configs folder
-    local SelectedFile = Library.Folders.Configs .. "/selected.txt"
+    local SelectedFile = Library.Folders.AutoLoad .. "/selected.txt"
+
+	local ConfigsList = ConfigsSection:Dropdown({
+        Name = "AutoLoad",
+        Flag = "ConfigsList",
+        Items = {},
+        Multi = false,
+        Callback = function(Value)
+            writefile(SelectedFile, Value)
+        end
+    })
 
     local ConfigsList = ConfigsSection:Dropdown({
         Name = "Configs",
@@ -3847,9 +3857,6 @@ do -- Configs
         Multi = false,
         Callback = function(Value)
             ConfigSelected = Value
-
-            -- save selected config
-            writefile(SelectedFile, Value)
         end
     })
 
@@ -3923,7 +3930,7 @@ do -- Configs
     -- auto load selected config
     if isfile(SelectedFile) then
         local SavedConfig = readfile(SelectedFile)
-        local Path = Library.Folders.Configs .. "/" .. SavedConfig
+        local Path = Library.Folders.AutoLoad .. "/" .. SavedConfig
 
         if isfile(Path) then
             ConfigSelected = SavedConfig
