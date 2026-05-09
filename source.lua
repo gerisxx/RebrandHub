@@ -3828,130 +3828,130 @@ end
     Library.CreateSettingsPage = function(self, Window)
 local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do
     local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
-    local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
-    local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
+local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
+local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
 
-    do -- Configs
-        local ConfigsSection = ConfigsSubPage:Section({
-            Name = "Configs",
-            Side = 1,
-            Icon = "97491613646216"
-        })
+do -- Configs
+    local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
 
-        local ConfigName = ""
-        local ConfigSelected
+    local ConfigName = ""
+    local ConfigSelected
 
-        -- folders
-        local ConfigFolder = Library.Folders.Configs
-        local AutoLoadFolder = Library.Folders.AutoLoad
+    -- folders
+    local AutoLoadFolder = Library.Folders.Main .. "/AutoLoad"
+    local SelectedFile = AutoLoadFolder .. "/selected.txt"
 
-        if not isfolder(AutoLoadFolder) then
-            makefolder(AutoLoadFolder)
+    if not isfolder(AutoLoadFolder) then
+        makefolder(AutoLoadFolder)
+    end
+
+    local ConfigsList = ConfigsSection:Dropdown({
+        Name = "Configs",
+        Flag = "ConfigsList",
+        Items = {},
+        Multi = false,
+        Callback = function(Value)
+            ConfigSelected = Value
         end
+    })
 
-        -- selected autoload file
-        local SelectedFile = AutoLoadFolder .. "/selected.txt"
+    ConfigsSection:Textbox({
+        Default = "",
+        Flag = "ConfigName",
+        Placeholder = "Config name",
+        Callback = function(Value)
+            ConfigName = Value
+        end
+    })
 
-        local AutoLoadList = ConfigsSection:Dropdown({
-            Name = "AutoLoad",
-            Flag = "AutoloadList",
-            Items = {},
-            Multi = false,
-            Callback = function(Value)
-                writefile(SelectedFile, Value)
-            end
-        })
+    ConfigsSection:Button({
+        Name = "Create",
+        Callback = function()
+            if ConfigName and ConfigName ~= "" then
+                local Path = Library.Folders.Configs .. "/" .. ConfigName .. ".json"
 
-        local ConfigsList = ConfigsSection:Dropdown({
-            Name = "Configs",
-            Flag = "ConfigsList",
-            Items = {},
-            Multi = false,
-            Callback = function(Value)
-                ConfigSelected = Value
-            end
-        })
-
-        ConfigsSection:Textbox({
-            Default = "",
-            Flag = "ConfigName",
-            Placeholder = "Config name",
-            Callback = function(Value)
-                ConfigName = Value
-            end
-        })
-
-        ConfigsSection:Button({
-            Name = "Create",
-            Callback = function()
-                if ConfigName ~= "" then
-                    local Path = ConfigFolder .. "/" .. ConfigName .. ".json"
-
-                    if not isfile(Path) then
-                        writefile(Path, Library:GetConfig())
-                    end
-
-                    Library:RefreshConfigsList(ConfigsList)
-                end
-            end
-        })
-
-        ConfigsSection:Button({
-            Name = "Delete",
-            Callback = function()
-                if ConfigSelected then
-                    Library:DeleteConfig(ConfigSelected)
-                    Library:RefreshConfigsList(ConfigsList)
-                end
-            end
-        })
-
-        ConfigsSection:Button({
-            Name = "Load",
-            Callback = function()
-                if ConfigSelected then
-                    local Path = ConfigFolder .. "/" .. ConfigSelected
-
-                    if isfile(Path) then
-                        Library:LoadConfig(readfile(Path))
-                    end
-                end
-            end
-        })
-
-        ConfigsSection:Button({
-            Name = "Save",
-            Callback = function()
-                if ConfigSelected then
-                    local Path = ConfigFolder .. "/" .. ConfigSelected
-
+                if not isfile(Path) then
                     writefile(Path, Library:GetConfig())
                     Library:RefreshConfigsList(ConfigsList)
                 end
             end
-        })
+        end
+    })
 
-        ConfigsSection:Button({
-            Name = "Refresh",
-            Callback = function()
+    ConfigsSection:Button({
+        Name = "Delete",
+        Callback = function()
+            if ConfigSelected then
+                Library:DeleteConfig(ConfigSelected)
                 Library:RefreshConfigsList(ConfigsList)
             end
-        })
+        end
+    })
 
-        -- auto load
-        if isfile(SelectedFile) then
-            local SavedConfig = readfile(SelectedFile)
-            local Path = ConfigFolder .. "/" .. SavedConfig
+    ConfigsSection:Button({
+        Name = "Load",
+        Callback = function()
+            if ConfigSelected then
+                local Path = Library.Folders.Configs .. "/" .. ConfigSelected
 
-            if isfile(Path) then
-                ConfigSelected = SavedConfig
-                Library:LoadConfig(readfile(Path))
+                if isfile(Path) then
+                    Library:LoadConfig(readfile(Path))
+                end
             end
         end
+    })
 
-        Library:RefreshConfigsList(ConfigsList)
-        Library:RefreshConfigsList(AutoLoadList)
+    ConfigsSection:Button({
+        Name = "Save",
+        Callback = function()
+            if ConfigSelected then
+                writefile(
+                    Library.Folders.Configs .. "/" .. ConfigSelected,
+                    Library:GetConfig()
+                )
+
+                Library:RefreshConfigsList(ConfigsList)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Set AutoLoad",
+        Callback = function()
+            if ConfigSelected then
+                writefile(SelectedFile, ConfigSelected)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Clear AutoLoad",
+        Callback = function()
+            if isfile(SelectedFile) then
+                delfile(SelectedFile)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        Name = "Refresh",
+        Callback = function()
+            Library:RefreshConfigsList(ConfigsList)
+        end
+    })
+
+    -- auto load selected config
+    if isfile(SelectedFile) then
+        local SavedConfig = readfile(SelectedFile)
+        local Path = Library.Folders.Configs .. "/" .. SavedConfig
+
+        if isfile(Path) then
+            ConfigSelected = SavedConfig
+            Library:LoadConfig(readfile(Path))
+        end
     end
+
+    Library:RefreshConfigsList(ConfigsList)
 end
 
             do -- Theming
